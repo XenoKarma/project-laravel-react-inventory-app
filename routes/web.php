@@ -14,14 +14,25 @@ Route::get('/', function () {
     ]);
 });
 
-Route::get('/dashboard', function () {
-    return Inertia::render('Dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+// Hanya admin yang bisa akses ini
+Route::middleware(['auth', 'role:admin'])->group(function () {
 
-Route::middleware('auth')->group(function () {
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-require __DIR__.'/auth.php';
+// hanya cashier yang bisa akses
+Route::middleware(['auth', 'role:cashier'])->group(function () {
+    Route::get('/dashboard', function () {
+        $user = Auth::user();
+        return "kamu login sebagai role : " . $user->role;
+    });
+});
+
+// hanya warehouse yang bisa akses
+Route::middleware(['auth', 'role:warehouse'])->group(function () {
+
+});
+
+// hanya owner yang bisa akses
+
+
+require __DIR__ . '/auth.php';
