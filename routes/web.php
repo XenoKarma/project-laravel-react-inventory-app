@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ProductController; // <-- TAMBAHKAN INI
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -14,25 +15,15 @@ Route::get('/', function () {
     ]);
 });
 
-// Hanya admin yang bisa akses ini
-Route::middleware(['auth', 'role:admin'])->group(function () {
-
-});
-
-// hanya cashier yang bisa akses
-Route::middleware(['auth', 'role:cashier'])->group(function () {
-    Route::get('/dashboard', function () {
-        $user = Auth::user();
-        return "kamu login sebagai role : " . $user->role;
+Route::middleware('auth')->group(function () {
+    // read only 4 role
+    Route::middleware('role:admin,warehouse,cashier,owner')->group(function () {
+        Route::apiResource('products', ProductController::class)->only(['index', 'show']);
+    });
+    // manage admin and warehouse(create,update,delete)
+    Route::middleware('role:admin,warehouse')->group(function () {
+        Route::apiResource('products', ProductController::class)->except(['index', 'show']);
     });
 });
-
-// hanya warehouse yang bisa akses
-Route::middleware(['auth', 'role:warehouse'])->group(function () {
-
-});
-
-// hanya owner yang bisa akses
-
 
 require __DIR__ . '/auth.php';
